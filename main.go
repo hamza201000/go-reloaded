@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"strconv"
@@ -11,26 +12,33 @@ import (
 func checkpun2(b []string) string {
 	m := ""
 	for i := 0; i < len(b); i++ {
-
-		m += (b[i])
-		if i != len(b)-1 {
+		m += (clean(b[i]))
+		if i != len(b)-1 && b[i] != "\n" && b[i+1] != "\n" {
 			m += " "
 		}
+
 	}
 
-	return m
+	return (m)
 }
 
 func split(f string) []string {
 	sn := false
-	s := []rune(f)
+	s := []rune(clean(f))
 	str := ""
 	a := []string{}
 	for i := 0; i < len(s); i++ {
-		if s[i] != ' ' {
+		if s[i] == '\n' {
+
+			a = append(a, str)
+			a = append(a, "\n")
+			str = ""
+			sn = false
+
+		} else if s[i] != ' ' && s[i] != '\n' {
 			str += string(s[i])
 			sn = true
-		} else if sn && s[i] == ' ' {
+		} else if sn && (s[i] == ' ') {
 			a = append(a, str)
 			str = ""
 			sn = false
@@ -55,11 +63,34 @@ func clean(f string) string {
 			sn = false
 		}
 	}
-	
-
-	return strings.TrimSpace(str)
+	if !sn {
+		return str[0 : len(str)-1]
+	}
+	return (str)
 }
 
+func clean2(f string) string {
+	sn := false
+	str := ""
+	s := []rune(f)
+	for i := 0; i < len(s); i++ {
+		if s[i] == ' ' && s[i+1] == '\n' && i != len(s)-1 {
+			str += "\n"
+			sn = true
+			i++
+		} else if i != len(s)-1 && s[i] == '\n' && s[i+1] == ' ' && !sn {
+			str += "\n"
+			sn = false
+
+		} else {
+			str += string(s[i])
+		}
+	}
+	if !sn {
+		return str[0 : len(str)-1]
+	}
+	return (str)
+}
 
 func check(s string) int {
 	f := ""
@@ -184,14 +215,36 @@ func mark(f string) string {
 }
 
 func main() {
-	data, err := os.ReadFile(os.Args[1])
-	if err != nil {
-		fmt.Println("Error1")
+	file, eror := os.Open(os.Args[1])
+	if eror != nil {
+		fmt.Println("Error can not open file")
 	}
+	defer file.Close()
+	var lines string
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines += clean(scanner.Text()) + "\n"
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Println("Error reading file")
+	}
+
+	// fmt.Println(lines)
+	//s := ""
+	/*for i := 0; i < len(lines); i++ {
+
+		s += lines[i]
+		if i != len(lines) {
+			s += "\n"
+		}
+
+	}*/
 
 	// a := "(up, 2) (low,  2) (up, 2)  (up)  "
 
-	b := split(string(data))
+	b := split((lines))
 
 	h := false
 	// m := ""
@@ -385,10 +438,11 @@ func main() {
 			// fmt.Println(b[i-1])
 		}
 	}
-	fmt.Println(b[0])
+	// fmt.Println(b[1])
+
 	m := checkpun2(b)
-	fmt.Println(b[0])
-	fmt.Println(m)
+	//fmt.Println(b[0])
+	//fmt.Println(m)
 	/*m := ""
 	for i := 0; i < len(b); i++ {
 		if b[i] != "" {
@@ -398,9 +452,10 @@ func main() {
 			}
 		}
 	}*/
-	f := mark(m)
-	str4 := []byte(clean(check2(f)))
-	err = os.WriteFile(os.Args[2], str4, 0o644)
+	f := (mark(m))
+	f = clean((m))
+	str4 := []byte((check2(f)))
+	err := os.WriteFile(os.Args[2], str4, 0o644)
 	if err != nil {
 		fmt.Println("Error2")
 	}

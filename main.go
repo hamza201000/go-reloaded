@@ -24,7 +24,7 @@ func checkpun2(b []string) string {
 
 func split(f string) []string {
 	sn := false
-	s := []rune(clean(f))
+	s := []rune((f))
 	str := ""
 	a := []string{}
 	for i := 0; i < len(s); i++ {
@@ -54,6 +54,9 @@ func clean(f string) string {
 	sn := false
 	str := ""
 	s := []rune(f)
+	if len(f) == 1 {
+		return f
+	}
 	for i := 0; i < len(s); i++ {
 		if s[i] != ' ' {
 			str += string(s[i])
@@ -224,7 +227,7 @@ func main() {
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		lines += clean(scanner.Text()) + "\n"
+		lines += (scanner.Text() + "\n")
 	}
 
 	if err := scanner.Err(); err != nil {
